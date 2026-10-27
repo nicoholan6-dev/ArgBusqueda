@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Argentina Búsqueda · Consulta de personas</title>
+<style>
+  *{box-sizing:border-box}
+  :root{
+    /* —— Paleta Argentina —— */
+    --sky:#74ACDF;            /* celeste de la bandera */
+    --sky-deep:#4A90C2;
+    --sky-tint:#eaf4fb;
+    --gold:#F6B40E;           /* sol de mayo */
+    --gold-tint:#fff8e5;
+
+    --bg:#f4f9fd;
+    --panel:#ffffff;
+    --panel2:#f5f9fc;
+    --bd:#cfe1ef;
+    --bd2:#dbe8f2;
+    --tx:#1a2b3c;
+    --mut:#4a6478;
+    --dim:#7a90a3;
+    --ok:#2e7d32;
+    --err:#c62828;
+    --warn:#ef6c00;
+    --acc:var(--sky-deep);
+  }
+  html,body{margin:0;padding:0}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1000px 500px at 0% 0%, #dbeefb 0%, transparent 55%),
+      radial-gradient(900px 450px at 100% 100%, #fdf3d8 0%, transparent 55%),
+      linear-gradient(180deg, #f4f9fd 0%, #ffffff 100%);
+    color:var(--tx);
+    padding:24px 18px 40px;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:780px;
+    margin:0 auto;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--bd);
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 20px 50px -24px rgba(26,43,60,.22), 0 4px 12px rgba(116,172,223,.08);
+    position:relative;
+    overflow:hidden;
+  }
+  .app::before{
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--sky) 0%, #fff 50%, var(--sky) 100%);
+  }
+  .hd{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+  .ava{
+    position:relative;
+    width:50px;height:50px;flex:0 0 auto;
+    border-radius:50%;
+    background:repeating-conic-gradient(from 0deg, var(--gold) 0deg 22.5deg, var(--sky) 22.5deg 45deg);
+    display:grid;place-items:center;
+    box-shadow:0 0 0 2px #fff, 0 3px 12px rgba(74,144,194,.35);
+  }
+  .ava::before{
+    content:'';position:absolute;inset:9px;border-radius:50%;background:#fff;
+    box-shadow:inset 0 0 0 1px rgba(246,180,14,.35);
+  }
+  .ava span{position:relative;z-index:1;font-weight:800;font-size:12px;letter-spacing:.03em;color:var(--tx)}
+  h1{font-size:17px;margin:0;letter-spacing:-.01em}
+  .sub{font-size:12px;color:var(--mut);margin:4px 0 0}
+  code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    background:var(--sky-tint);
+    padding:1px 6px;border-radius:5px;font-size:11px;color:#2a6ba0;
+    border:1px solid #d4e5f2;
+  }
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fld{display:flex;flex-direction:column;gap:6px}
+  .fld.full{grid-column:1/-1}
+  label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);font-weight:600}
+  input,select,textarea{
+    background:var(--panel);
+    border:1px solid var(--bd);
+    color:var(--tx);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:13px;
+    font-family:inherit;
+    outline:none;
+    width:100%;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,select:focus,textarea:focus{
+    border-color:var(--sky-deep);
+    box-shadow:0 0 0 3px rgba(74,144,194,.18);
+  }
+  textarea{
+    resize:vertical;min-height:64px;
+    font-family:ui-monospace,monospace;
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  button{
+    border:0;border-radius:10px;
+    padding:10px 16px;font-size:13px;font-weight:600;
+    cursor:pointer;font-family:inherit;
+    transition:filter .15s, transform .05s;
+  }
+  .p{
+    background:linear-gradient(180deg, var(--sky) 0%, var(--sky-deep) 100%);
+    color:#fff;
+    box-shadow:0 3px 10px rgba(74,144,194,.35), inset 0 1px 0 rgba(255,255,255,.2);
+  }
+  .p:hover{filter:brightness(1.06)}
+  .p:active{transform:translateY(1px)}
+  .s{
+    background:var(--panel);
+    color:var(--tx);
+    border:1px solid var(--bd);
+  }
+  .s:hover{border-color:var(--sky-deep);background:var(--sky-tint)}
+  button:disabled{opacity:.5;cursor:default;filter:none}
+  .pill{
+    font-size:11.5px;
+    padding:5px 11px;
+    border-radius:999px;
+    background:var(--gold-tint);
+    border:1px solid #f6d78a;
+    color:#8a6516;
+    margin-left:auto;
+    white-space:nowrap;
+    font-weight:600;
+  }
+  .log{
+    margin-top:14px;
+    background:#142030;
+    border:1px solid #1f2f45;
+    border-radius:11px;
+    padding:12px;
+    max-height:150px;
+    overflow:auto;
+    font-family:ui-monospace,monospace;
+    font-size:11.5px;
+    line-height:1.7;
+    color:#cfe1ef;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.3);
+  }
+  .ln .t{color:#5a7691;margin-right:6px}
+  .ln.dim{color:#8ba3b8}
+  .ln.ok{color:#6ee08a}
+  .ln.err{color:#ff7a72}
+  .ln.warn{color:#f0b544}
+  .hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+  .chip{
+    font-size:11.5px;
+    padding:6px 11px;
+    border-radius:999px;
+    background:var(--panel);
+    border:1px solid var(--bd);
+    cursor:pointer;
+    color:var(--tx);
+    transition:border-color .15s, background .15s;
+  }
+  .chip:hover{border-color:var(--sky-deep);background:var(--sky-tint)}
+  .chip b{color:var(--ok)}
+  .chip i{color:var(--err);font-style:normal}
+  .res{
+    background:var(--panel);
+    border:1px solid var(--bd2);
+    border-radius:14px;
+    margin-top:14px;
+    overflow:hidden;
+    box-shadow:0 2px 10px -4px rgba(26,43,60,.08);
+  }
+  .rhead{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 14px;
+    border-bottom:1px solid var(--bd2);
+    font-size:13px;font-weight:600;
+  }
+  .rhead.good{background:linear-gradient(90deg, rgba(46,125,50,.09), rgba(46,125,50,.02))}
+  .rhead.bad{background:linear-gradient(90deg, rgba(198,40,40,.09), rgba(198,40,40,.02))}
+  .rhead.warn{background:linear-gradient(90deg, rgba(239,108,0,.09), rgba(239,108,0,.02))}
+  .badge{
+    margin-left:auto;
+    font-family:ui-monospace,monospace;
+    font-size:11px;
+    padding:3px 9px;
+    border-radius:999px;
+    background:#f5f9fc;
+    border:1px solid var(--bd);
+    color:var(--mut);
+  }
+  .ms{color:var(--dim);font-weight:400;font-size:11px}
+  .body{padding:14px}
+  .name{font-size:16px;font-weight:700;margin-bottom:10px}
+  .kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px}
+  .kv>div{
+    display:flex;justify-content:space-between;gap:8px;
+    border-bottom:1px dashed #e2eef6;
+    padding:4px 0;font-size:12.5px;
+  }
+  .k{color:var(--mut)}
+  .v{font-weight:600;text-align:right;word-break:break-word}
+  .muerto{color:var(--err)}
+  .vivo{color:var(--ok)}
+  details{margin-top:12px}
+  summary{cursor:pointer;font-size:12px;color:var(--sky-deep);font-weight:600}
+  summary:hover{color:#2a6ba0}
+  pre{
+    background:#f5f9fc;
+    border:1px solid var(--bd2);
+    border-radius:9px;
+    padding:11px;
+    overflow:auto;
+    font-size:11.5px;
+    line-height:1.6;
+    max-height:280px;
+    margin:8px 0 0;
+    color:var(--tx);
+    font-family:ui-monospace,monospace;
+  }
+  .note{font-size:12px;color:var(--mut);margin-top:14px;line-height:1.7}
+  .note b{color:var(--tx)}
+  @media(max-width:560px){
+    body{padding:14px 10px 30px}
+    .app{padding:16px;border-radius:16px}
+    .grid{grid-template-columns:1fr}
+    .kv{grid-template-columns:1fr}
+    .hd{flex-wrap:wrap}
+    .pill{margin-left:0;margin-top:2px}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="hd">
+    <div class="ava"><span>AB</span></div>
+    <div>
+      <h1>Argentina Búsqueda</h1>
+      <p class="sub">Consulta de personas · POST <code>/api/new-on-boarding/consult-person</code></p>
+    </div>
+    <span class="pill" id="modePill">modo: directo</span>
+  </div>
+
+  <div class="grid">
+    <div class="fld full">
+      <label>Documento(s) — separados por coma o salto de línea</label>
+      <textarea id="docs" placeholder="44206361"></textarea>
+    </div>
+    <div class="fld">
+      <label>page_code</label>
+      <input id="page" type="number" value="710">
+    </div>
+    <div class="fld">
+      <label>Envío</label>
+      <select id="mode">
+        <option value="direct">Directo (fetch)</option>
+        <option value="corsproxy">Proxy corsproxy.io</option>
+        <option value="allorigins">Proxy allorigins</option>
+        <option value="local">Proxy local (localhost:3000)</option>
+      </select>
+    </div>
+    <div class="fld full">
+      <label>x-api-key</label>
+      <input id="key" type="text" spellcheck="false">
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="p" id="go">Consultar</button>
+    <button class="s" id="ex">Ejemplo (payload exacto)</button>
+    <button class="s" id="csv">Exportar CSV</button>
+    <button class="s" id="clr">Limpiar</button>
+  </div>
+
+  <div class="log" id="log"></div>
+  <div class="hist" id="hist"></div>
+  <div id="out"></div>
+
+  <div class="note">
+    El <code>sequence_flow_key</code> se regenera en cada request con el patrón
+    <code>YYYYMMDDHHMMSS + 5 dígitos aleatorios</code>.
+    La respuesta <code>"Exist in redis"</code> significa que el padrón se sirvió desde caché.
+    Si el fetch directo se cae por CORS, el bot reintenta solo vía proxy.
+    Enter en el textarea dispara la consulta.
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ============ CONFIG ============ */
+  const API      = 'https://backoffice.anticipo.com.ar/api/new-on-boarding/consult-person';
+  const API_KEY  = 'zUZqPO0DYTRa2wbaPWOEpwaXbazqwxQu0l0qJ0VSpGk';
+  const PAGE_DEF = 710;
+  const PROXY_LOCAL = 'http://localhost:3000/api/consult-person';
+  const PROXY_CORS  = 'https://corsproxy.io/?url=';
+  const PROXY_ALL   = 'https://api.allorigins.win/raw?url=';
+  const LS = 'arg_busqueda_v1';
+  /* ================================= */
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s)
+    .replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const LABELS = {
+    apenom:'Apellido y nombre', nombre:'Nombre', apellido:'Apellido', documento:'Documento',
+    cuil:'CUIL', sexo:'Sexo', fecha_nac:'Fecha de nacimiento', fallecido:'Fallecido',
+    fecha_fallecido:'Fecha de fallecimiento', nacionalidad:'Nacionalidad', calle:'Calle',
+    altura:'Altura', piso:'Piso', dpto:'Departamento', cp:'Código postal',
+    localidad:'Localidad', provincia:'Provincia', cod_provincia:'Código provincia'
+  };
+  const ORDER = ['apenom','nombre','apellido','documento','cuil','sexo','fecha_nac',
+    'fallecido','fecha_fallecido','nacionalidad','calle','altura','piso','dpto','cp',
+    'localidad','provincia','cod_provincia'];
+
+  const st = { key: API_KEY, page: PAGE_DEF, mode: 'direct', docs: '', hist: [], rows: [] };
+
+  function load(){
+    try{
+      const s = JSON.parse(localStorage.getItem(LS) || '{}');
+      ['key','page','mode','docs','hist'].forEach(k => { if (s[k] !== undefined) st[k] = s[k]; });
+    }catch(e){}
+  }
+  function save(){
+    try{ localStorage.setItem(LS, JSON.stringify({
+      key:st.key, page:st.page, mode:st.mode, docs:st.docs, hist:st.hist
+    })); }catch(e){}
+  }
+
+  const hh = () => new Date().toLocaleTimeString('es-AR', { hour12:false });
+  function log(m, t){
+    const l = $('log'); const d = document.createElement('div');
+    d.className = 'ln ' + (t || '');
+    d.innerHTML = '<span class="t">' + hh() + '</span>' + esc(m);
+    l.appendChild(d); l.scrollTop = l.scrollHeight;
+  }
+
+  function seqKey(){
+    const d = new Date(), p = n => String(n).padStart(2,'0');
+    return d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) +
+           p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) +
+           String(Math.floor(Math.random()*100000)).padStart(5,'0');
+  }
+
+  const fmtFecha = s => {
+    if (!s) return '—';
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : s;
+  };
+  const fmtSexo = s => s === 'M' ? 'Masculino' : s === 'F' ? 'Femenino' : (s || '—');
+
+  async function rawFetch(url, payload, key){
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'accept': 'application/json',
+        'x-api-key': key
+      },
+      body: JSON.stringify(payload)
+    });
+    const t = await r.text();
+    try { return JSON.parse(t); }
+    catch(e){ throw new Error('HTTP ' + r.status + ' · respuesta no-JSON: ' + t.slice(0,180)); }
+  }
+
+  const viaProxy = (prefix, payload, key) =>
+    rawFetch(prefix + encodeURIComponent(API), payload, key);
+
+  async function callApi(payload, key, mode){
+    if (mode === 'corsproxy') return viaProxy(PROXY_CORS, payload, key);
+    if (mode === 'allorigins') return viaProxy(PROXY_ALL, payload, key);
+    if (mode === 'local') return rawFetch(PROXY_LOCAL, payload, key);
+    try { return await rawFetch(API, payload, key); }
+    catch(e){
+      log('fetch directo falló (' + e.message + ') → reintento vía proxy…', 'warn');
+      return viaProxy(PROXY_CORS, payload, key);
+    }
+  }
+
+  const curlCmd = (p, k) =>
+    "curl -X POST '" + API + "' \\\n" +
+    "  -H 'content-type: application/json' \\\n" +
+    "  -H 'x-api-key: " + k + "' \\\n" +
+    "  -d '" + JSON.stringify(p) + "'";
+
+  function card(doc, payload, res, err, ms){
+    const el = document.createElement('div'); el.className = 'res';
+    const code = res && res.response_code;
+    const cls = err ? 'bad' : (code === 200 ? 'good' : 'warn');
+    el.innerHTML =
+      '<div class="rhead ' + cls + '">' +
+        '<span>DNI ' + esc(doc) + '</span>' +
+        '<span class="ms">' + ms + ' ms</span>' +
+        '<span class="badge">' + (err ? 'ERROR' : 'code ' + esc(code)) + '</span>' +
+      '</div>';
+
+    const b = document.createElement('div'); b.className = 'body';
+    el.appendChild(b);
+
+    let general = null;
+
+    if (err){
+      b.innerHTML = '<div class="muerto">✕ ' + esc(err) + '</div>';
+    } else {
+      const r = res && res.data && res.data.padron &&
+                res.data.padron.RESULTADO && res.data.padron.RESULTADO[0];
+      if (r && r.datos_generales){
+        general = r.datos_generales;
+        b.innerHTML = '<div class="name">' + esc(general.apenom || '—') + '</div>';
+        const kv = document.createElement('div'); kv.className = 'kv';
+        ORDER.forEach(k => {
+          let v = general[k];
+          if (k === 'fecha_nac')       v = fmtFecha(v);
+          if (k === 'fecha_fallecido') v = fmtFecha(v);
+          if (k === 'sexo')            v = fmtSexo(v);
+          if (v === '' || v == null)   v = '—';
+          const hl = (k === 'fallecido' && general.fallecido === 'SI') ? 'muerto'
+                   : (k === 'fallecido' ? 'vivo' : '');
+          const d = document.createElement('div');
+          d.innerHTML = '<span class="k">' + LABELS[k] + '</span>' +
+                        '<span class="v ' + hl + '">' + esc(v) + '</span>';
+          kv.appendChild(d);
+        });
+        b.appendChild(kv);
+
+        const meta = document.createElement('div');
+        meta.className = 'note';
+        meta.innerHTML = 'process: <b>' + esc(res.process) + '</b> · msg: <b>' +
+          esc(res.msg) + '</b> · exist_db: <b>' + esc(res.data.exist_db) + '</b>';
+        b.appendChild(meta);
+      } else if (res && res.data && res.data.exist === false){
+        b.innerHTML = '<div class="warn">No figura en el padrón (exist: false).</div>';
+      } else {
+        b.innerHTML = '<div class="warn">Respuesta sin datos de padrón.</div>';
+      }
+    }
+
+    const det = document.createElement('details');
+    det.innerHTML = '<summary>ver JSON crudo / cURL</summary>' +
+      '<pre>' + esc(JSON.stringify(res || { error: err }, null, 2)) + '</pre>' +
+      '<pre>' + esc(curlCmd(payload, st.key)) + '</pre>';
+    b.appendChild(det);
+
+    if (general) st.rows.push({ doc: doc, g: general });
+    return el;
+  }
+
+  async function runQuery(doc, fixedSeq){
+    doc = String(doc || '').replace(/\D/g, '');
+    if (!doc){ log('documento vacío o inválido', 'err'); return; }
+
+    const payload = {
+      page_code: Number($('page').value) || PAGE_DEF,
+      document_number: doc,
+      sequence_flow_key: fixedSeq || seqKey()
+    };
+
+    log('→ POST ' + API, 'dim');
+    log('payload: ' + JSON.stringify(payload));
+
+    const t0 = performance.now();
+    let res = null, err = null;
+    try { res = await callApi(payload, $('key').value.trim(), $('mode').value); }
+    catch(e){ err = e.message; }
+    const ms = Math.round(performance.now() - t0);
+
+    if (err) log('✕ ' + err, 'err');
+    else log('✓ respuesta en ' + ms + ' ms · response_code=' + res.response_code + ' · ' + res.msg, 'ok');
+
+    $('out').prepend(card(doc, payload, res, err, ms));
+
+    st.hist.unshift({ doc: doc, ts: Date.now(), ok: !err && res && res.response_code === 200 });
+    st.hist = st.hist.slice(0, 12);
+    save(); renderHist();
+  }
+
+  function renderHist(){
+    const h = $('hist'); h.innerHTML = '';
+    if (!st.hist.length) return;
+    st.hist.forEach(x => {
+      const c = document.createElement('span'); c.className = 'chip';
+      c.innerHTML = (x.ok ? '<b>●</b> ' : '<i>●</i> ') + esc(x.doc) +
+        ' <span style="color:#7a90a3">' +
+        new Date(x.ts).toLocaleTimeString('es-AR', { hour12:false }) + '</span>';
+      c.onclick = () => runQuery(x.doc);
+      h.appendChild(c);
+    });
+  }
+
+  async function batch(){
+    const list = $('docs').value
+      .split(/[\s,;]+/).map(s => s.replace(/\D/g,'')).filter(Boolean);
+    if (!list.length){ log('escribí al menos un documento', 'err'); return; }
+
+    $('go').disabled = true;
+    st.rows = [];
+    log('▶ lote de ' + list.length + ' documento(s)', 'dim');
+    for (let i = 0; i < list.length; i++){
+      await runQuery(list[i]);
+      if (i < list.length - 1) await new Promise(r => setTimeout(r, 300));
+    }
+    log('■ lote terminado', 'ok');
+    $('go').disabled = false;
+  }
+
+  function exportCSV(){
+    if (!st.rows.length){ log('no hay resultados para exportar', 'err'); return; }
+    const cols = ORDER;
+    const head = ['documento_consultado'].concat(cols.map(c => LABELS[c]));
+    const lines = [head.join(';')];
+    st.rows.forEach(r => {
+      const row = [r.doc];
+      cols.forEach(c => {
+        let v = r.g[c];
+        if (c === 'fecha_nac' || c === 'fecha_fallecido') v = fmtFecha(v);
+        if (c === 'sexo') v = fmtSexo(v);
+        row.push(String(v == null ? '' : v).replace(/;/g, ','));
+      });
+      lines.push(row.join(';'));
+    });
+    const blob = new Blob(['\uFEFF' + lines.join('\n')], { type:'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'argentina_busqueda_' + Date.now() + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    log('CSV exportado (' + st.rows.length + ' filas)', 'ok');
+  }
+
+  function init(){
+    load();
+    $('key').value  = st.key;
+    $('page').value = st.page;
+    $('mode').value = st.mode;
+    $('docs').value = st.docs || '';
+    $('modePill').textContent = 'modo: ' + $('mode').options[$('mode').selectedIndex].text;
+    renderHist();
+    log('Argentina Búsqueda · listo', 'ok');
+    log('pegá uno o varios documentos y presioná Consultar', 'dim');
+
+    $('go').onclick  = batch;
+    $('csv').onclick = exportCSV;
+    $('clr').onclick = () => { $('out').innerHTML = ''; $('log').innerHTML = ''; log('vista limpia','dim'); };
+
+    $('ex').onclick = () => {
+      $('docs').value = '44206361';
+      $('page').value = PAGE_DEF;
+      st.docs = '44206361'; save();
+      log('payload de ejemplo · sequence_flow_key fijo 2026102613062288873', 'dim');
+      runQuery('44206361', '2026102613062288873');
+    };
+
+    $('mode').onchange = () => {
+      st.mode = $('mode').value; save();
+      $('modePill').textContent = 'modo: ' + $('mode').options[$('mode').selectedIndex].text;
+      log('modo de envío: ' + $('mode').value, 'dim');
+    };
+    $('key').onchange  = () => { st.key  = $('key').value.trim();  save(); };
+    $('page').onchange = () => { st.page = Number($('page').value) || PAGE_DEF; save(); };
+    $('docs').oninput  = () => { st.docs = $('docs').value; save(); };
+    $('docs').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); batch(); }
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
